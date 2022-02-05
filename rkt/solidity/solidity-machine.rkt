@@ -108,7 +108,8 @@
     ;;   #:set (lambda (state arg val) (table-set (progstate-balance state) arg val)))
 
     ;; Gas consumption.
-    (define-progstate-type 'cost
+    (define-progstate-type 
+      'cost
       #:get (lambda (state) (progstate-cost state))
       #:set (lambda (state val) (set-progstate-cost! state val))
       #:const 0

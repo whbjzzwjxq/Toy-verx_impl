@@ -8,10 +8,10 @@
   (let* ([t (let ([parent (current-thread)])
               (thread
                (thunk
-                (thread-send 
+                (thread-send
                  parent
                  (with-handlers [(exn? identity)]
-                                expr)))))]
+                   expr)))))]
          [out (sync/timeout sec t)])
     (cond [out  (thread-receive)]
           [else (break-thread t)

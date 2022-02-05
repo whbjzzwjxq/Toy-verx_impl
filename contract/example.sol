@@ -36,7 +36,7 @@ contract Escrow {
 contract Crowdsale {
   Escrow escrow;
   uint256 raised = 0;
-  uint256 goal = 10000 * 10**18;
+  uint256 goal = 10000;
   uint256 closeTime = now + 30 days;
 
   constructor() public{

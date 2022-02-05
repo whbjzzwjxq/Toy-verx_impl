@@ -1,0 +1,607 @@
+Syntax trees:
+
+
+======= ./contract/example.sol =======
+PragmaDirective
+   Gas costs: 0
+   Source: "pragma solidity ^0.5.0;"
+ContractDefinition "Escrow"
+   Source: "contract Escrow {\n  mapping(address => uint256) deposits;\n  enum State {OPEN, SUCCESS, REFUND}\n  State state = State.OPEN;\n  address owner;\n  address payable beneficiary;\n\n  constructor(address payable b) public {\n    beneficiary = b;\n    owner = msg.sender;\n  }\n\n  function deposit(address p) onlyOwner public payable {\n    deposits[p] = deposits[p] + msg.value;\n  }\n\n  function withdraw() public {\n    require(state == State.SUCCESS);\n    beneficiary.transfer(address(this).balance);\n  }\n\n  function claimRefund(address payable p) public {\n    require(state == State.REFUND);\n    uint256 amount = deposits[p];\n    deposits[p] = 0;\n    p.transfer(amount);\n  }\n\n  modifier onlyOwner {require(owner == msg.sender); _; }\n  function close() onlyOwner public{state = State.SUCCESS;}\n  function refund() onlyOwner public{state = State.REFUND;}\n}"
+  VariableDeclaration "deposits"
+     Type: mapping(address => uint256)
+     Gas costs: 0
+     Source: "mapping(address => uint256) deposits"
+    Mapping
+       Source: "mapping(address => uint256)"
+      ElementaryTypeName address
+         Source: "address"
+      ElementaryTypeName uint256
+         Source: "uint256"
+  EnumDefinition "State"
+    EnumValue "OPEN"
+    EnumValue "SUCCESS"
+    EnumValue "REFUND"
+  VariableDeclaration "state"
+     Type: enum Escrow.State
+     Gas costs: 0
+     Source: "State state = State.OPEN"
+    UserDefinedTypeName "State"
+       Source: "State"
+    MemberAccess to member OPEN
+       Type: enum Escrow.State
+       Source: "State.OPEN"
+      Identifier State
+         Type: type(enum Escrow.State)
+         Source: "State"
+  VariableDeclaration "owner"
+     Type: address
+     Gas costs: 0
+     Source: "address owner"
+    ElementaryTypeName address
+       Source: "address"
+  VariableDeclaration "beneficiary"
+     Type: address payable
+     Gas costs: 0
+     Source: "address payable beneficiary"
+    ElementaryTypeName address
+       Source: "address payable"
+  FunctionDefinition "" - public
+     Source: "constructor(address payable b) public {\n    beneficiary = b;\n    owner = msg.sender;\n  }"
+    ParameterList
+       Gas costs: 0
+       Source: "(address payable b)"
+      VariableDeclaration "b"
+         Type: address payable
+         Source: "address payable b"
+        ElementaryTypeName address
+           Source: "address payable"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{\n    beneficiary = b;\n    owner = msg.sender;\n  }"
+      ExpressionStatement
+         Gas costs: 0
+         Source: "beneficiary = b"
+        Assignment using operator =
+           Type: address payable
+           Source: "beneficiary = b"
+          Identifier beneficiary
+             Type: address payable
+             Source: "beneficiary"
+          Identifier b
+             Type: address payable
+             Source: "b"
+      ExpressionStatement
+         Gas costs: 0
+         Source: "owner = msg.sender"
+        Assignment using operator =
+           Type: address
+           Source: "owner = msg.sender"
+          Identifier owner
+             Type: address
+             Source: "owner"
+          MemberAccess to member sender
+             Type: address payable
+             Source: "msg.sender"
+            Identifier msg
+               Type: msg
+               Source: "msg"
+  FunctionDefinition "deposit" - public
+     Source: "function deposit(address p) onlyOwner public payable {\n    deposits[p] = deposits[p] + msg.value;\n  }"
+    ParameterList
+       Gas costs: 0
+       Source: "(address p)"
+      VariableDeclaration "p"
+         Type: address
+         Source: "address p"
+        ElementaryTypeName address
+           Source: "address"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    ModifierInvocation "onlyOwner"
+       Gas costs: 0
+       Source: "onlyOwner"
+      Identifier onlyOwner
+         Type: modifier ()
+         Source: "onlyOwner"
+    Block
+       Source: "{\n    deposits[p] = deposits[p] + msg.value;\n  }"
+      ExpressionStatement
+         Gas costs: 20405
+         Source: "deposits[p] = deposits[p] + msg.value"
+        Assignment using operator =
+           Type: uint256
+           Source: "deposits[p] = deposits[p] + msg.value"
+          IndexAccess
+             Type: uint256
+             Source: "deposits[p]"
+            Identifier deposits
+               Type: mapping(address => uint256)
+               Source: "deposits"
+            Identifier p
+               Type: address
+               Source: "p"
+          BinaryOperation using operator +
+             Type: uint256
+             Source: "deposits[p] + msg.value"
+            IndexAccess
+               Type: uint256
+               Source: "deposits[p]"
+              Identifier deposits
+                 Type: mapping(address => uint256)
+                 Source: "deposits"
+              Identifier p
+                 Type: address
+                 Source: "p"
+            MemberAccess to member value
+               Type: uint256
+               Source: "msg.value"
+              Identifier msg
+                 Type: msg
+                 Source: "msg"
+  FunctionDefinition "withdraw" - public
+     Source: "function withdraw() public {\n    require(state == State.SUCCESS);\n    beneficiary.transfer(address(this).balance);\n  }"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{\n    require(state == State.SUCCESS);\n    beneficiary.transfer(address(this).balance);\n  }"
+      ExpressionStatement
+         Gas costs: 323
+         Source: "require(state == State.SUCCESS)"
+        FunctionCall
+           Type: tuple()
+           Source: "require(state == State.SUCCESS)"
+          Identifier require
+             Type: function (bool) pure
+             Source: "require"
+          BinaryOperation using operator ==
+             Type: bool
+             Source: "state == State.SUCCESS"
+            Identifier state
+               Type: enum Escrow.State
+               Source: "state"
+            MemberAccess to member SUCCESS
+               Type: enum Escrow.State
+               Source: "State.SUCCESS"
+              Identifier State
+                 Type: type(enum Escrow.State)
+                 Source: "State"
+      ExpressionStatement
+         Gas costs: [???]
+         Source: "beneficiary.transfer(address(this).balance)"
+        FunctionCall
+           Type: tuple()
+           Source: "beneficiary.transfer(address(this).balance)"
+          MemberAccess to member transfer
+             Type: function (uint256)
+             Source: "beneficiary.transfer"
+            Identifier beneficiary
+               Type: address payable
+               Source: "beneficiary"
+          MemberAccess to member balance
+             Type: uint256
+             Source: "address(this).balance"
+            FunctionCall
+               Type: address
+               Source: "address(this)"
+              ElementaryTypeNameExpression address
+                 Type: type(address)
+                 Source: "address"
+              Identifier this
+                 Type: contract Escrow
+                 Source: "this"
+  FunctionDefinition "claimRefund" - public
+     Source: "function claimRefund(address payable p) public {\n    require(state == State.REFUND);\n    uint256 amount = deposits[p];\n    deposits[p] = 0;\n    p.transfer(amount);\n  }"
+    ParameterList
+       Gas costs: 0
+       Source: "(address payable p)"
+      VariableDeclaration "p"
+         Type: address payable
+         Source: "address payable p"
+        ElementaryTypeName address
+           Source: "address payable"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{\n    require(state == State.REFUND);\n    uint256 amount = deposits[p];\n    deposits[p] = 0;\n    p.transfer(amount);\n  }"
+      ExpressionStatement
+         Gas costs: 323
+         Source: "require(state == State.REFUND)"
+        FunctionCall
+           Type: tuple()
+           Source: "require(state == State.REFUND)"
+          Identifier require
+             Type: function (bool) pure
+             Source: "require"
+          BinaryOperation using operator ==
+             Type: bool
+             Source: "state == State.REFUND"
+            Identifier state
+               Type: enum Escrow.State
+               Source: "state"
+            MemberAccess to member REFUND
+               Type: enum Escrow.State
+               Source: "State.REFUND"
+              Identifier State
+                 Type: type(enum Escrow.State)
+                 Source: "State"
+      VariableDeclarationStatement
+         Gas costs: 307
+         Source: "uint256 amount = deposits[p]"
+        VariableDeclaration "amount"
+           Type: uint256
+           Source: "uint256 amount"
+          ElementaryTypeName uint256
+             Source: "uint256"
+        IndexAccess
+           Type: uint256
+           Source: "deposits[p]"
+          Identifier deposits
+             Type: mapping(address => uint256)
+             Source: "deposits"
+          Identifier p
+             Type: address payable
+             Source: "p"
+      ExpressionStatement
+         Gas costs: 5104
+         Source: "deposits[p] = 0"
+        Assignment using operator =
+           Type: uint256
+           Source: "deposits[p] = 0"
+          IndexAccess
+             Type: uint256
+             Source: "deposits[p]"
+            Identifier deposits
+               Type: mapping(address => uint256)
+               Source: "deposits"
+            Identifier p
+               Type: address payable
+               Source: "p"
+          Literal, token: [no token] value: 0
+             Type: int_const 0
+             Source: "0"
+      ExpressionStatement
+         Gas costs: [???]
+         Source: "p.transfer(amount)"
+        FunctionCall
+           Type: tuple()
+           Source: "p.transfer(amount)"
+          MemberAccess to member transfer
+             Type: function (uint256)
+             Source: "p.transfer"
+            Identifier p
+               Type: address payable
+               Source: "p"
+          Identifier amount
+             Type: uint256
+             Source: "amount"
+  ModifierDefinition "onlyOwner"
+     Source: "modifier onlyOwner {require(owner == msg.sender); _; }"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{require(owner == msg.sender); _; }"
+      ExpressionStatement
+         Gas costs: 996
+         Source: "require(owner == msg.sender)"
+        FunctionCall
+           Type: tuple()
+           Source: "require(owner == msg.sender)"
+          Identifier require
+             Type: function (bool) pure
+             Source: "require"
+          BinaryOperation using operator ==
+             Type: bool
+             Source: "owner == msg.sender"
+            Identifier owner
+               Type: address
+               Source: "owner"
+            MemberAccess to member sender
+               Type: address payable
+               Source: "msg.sender"
+              Identifier msg
+                 Type: msg
+                 Source: "msg"
+      PlaceholderStatement
+         Gas costs: 0
+         Source: "_"
+  FunctionDefinition "close" - public
+     Source: "function close() onlyOwner public{state = State.SUCCESS;}"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    ModifierInvocation "onlyOwner"
+       Gas costs: 0
+       Source: "onlyOwner"
+      Identifier onlyOwner
+         Type: modifier ()
+         Source: "onlyOwner"
+    Block
+       Source: "{state = State.SUCCESS;}"
+      ExpressionStatement
+         Gas costs: 20287
+         Source: "state = State.SUCCESS"
+        Assignment using operator =
+           Type: enum Escrow.State
+           Source: "state = State.SUCCESS"
+          Identifier state
+             Type: enum Escrow.State
+             Source: "state"
+          MemberAccess to member SUCCESS
+             Type: enum Escrow.State
+             Source: "State.SUCCESS"
+            Identifier State
+               Type: type(enum Escrow.State)
+               Source: "State"
+  FunctionDefinition "refund" - public
+     Source: "function refund() onlyOwner public{state = State.REFUND;}"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    ModifierInvocation "onlyOwner"
+       Gas costs: 0
+       Source: "onlyOwner"
+      Identifier onlyOwner
+         Type: modifier ()
+         Source: "onlyOwner"
+    Block
+       Source: "{state = State.REFUND;}"
+      ExpressionStatement
+         Gas costs: 20287
+         Source: "state = State.REFUND"
+        Assignment using operator =
+           Type: enum Escrow.State
+           Source: "state = State.REFUND"
+          Identifier state
+             Type: enum Escrow.State
+             Source: "state"
+          MemberAccess to member REFUND
+             Type: enum Escrow.State
+             Source: "State.REFUND"
+            Identifier State
+               Type: type(enum Escrow.State)
+               Source: "State"
+ContractDefinition "Crowdsale"
+   Source: "contract Crowdsale {\n  Escrow escrow;\n  uint256 raised = 0;\n  uint256 goal = 10000;\n  uint256 closeTime = now + 30 days;\n\n  constructor() public{\n    escrow = new Escrow(address(0xDEADBEEF));\n  }\n\n  function invest() payable public{\n    // fix:\n    //require(now<=closeTime);\n    require(raised < goal);\n    escrow.deposit.value(msg.value)(msg.sender);\n    raised += msg.value;\n  }\n\n  function close() public{\n    require(now > closeTime || raised >= goal);\n    if (raised >= goal) {\n      escrow.close();\n    } else {\n      escrow.refund();\n\t }\n  }\n}"
+  VariableDeclaration "escrow"
+     Type: contract Escrow
+     Gas costs: 0
+     Source: "Escrow escrow"
+    UserDefinedTypeName "Escrow"
+       Source: "Escrow"
+  VariableDeclaration "raised"
+     Type: uint256
+     Gas costs: 0
+     Source: "uint256 raised = 0"
+    ElementaryTypeName uint256
+       Source: "uint256"
+    Literal, token: [no token] value: 0
+       Type: int_const 0
+       Source: "0"
+  VariableDeclaration "goal"
+     Type: uint256
+     Gas costs: 0
+     Source: "uint256 goal = 10000"
+    ElementaryTypeName uint256
+       Source: "uint256"
+    Literal, token: [no token] value: 10000
+       Type: int_const 10000
+       Source: "10000"
+  VariableDeclaration "closeTime"
+     Type: uint256
+     Gas costs: 0
+     Source: "uint256 closeTime = now + 30 days"
+    ElementaryTypeName uint256
+       Source: "uint256"
+    BinaryOperation using operator +
+       Type: uint256
+       Source: "now + 30 days"
+      Identifier now
+         Type: uint256
+         Source: "now"
+      Literal, token: [no token] value: 30
+         Type: int_const 2592000
+         Source: "30 days"
+  FunctionDefinition "" - public
+     Source: "constructor() public{\n    escrow = new Escrow(address(0xDEADBEEF));\n  }"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{\n    escrow = new Escrow(address(0xDEADBEEF));\n  }"
+      ExpressionStatement
+         Gas costs: 0
+         Source: "escrow = new Escrow(address(0xDEADBEEF))"
+        Assignment using operator =
+           Type: contract Escrow
+           Source: "escrow = new Escrow(address(0xDEADBEEF))"
+          Identifier escrow
+             Type: contract Escrow
+             Source: "escrow"
+          FunctionCall
+             Type: contract Escrow
+             Source: "new Escrow(address(0xDEADBEEF))"
+            NewExpression
+               Type: function (address payable) returns (contract Escrow)
+               Source: "new Escrow"
+              UserDefinedTypeName "Escrow"
+                 Source: "Escrow"
+            FunctionCall
+               Type: address payable
+               Source: "address(0xDEADBEEF)"
+              ElementaryTypeNameExpression address
+                 Type: type(address)
+                 Source: "address"
+              Literal, token: [no token] value: 0xDEADBEEF
+                 Type: int_const 3735928559
+                 Source: "0xDEADBEEF"
+  FunctionDefinition "invest" - public
+     Source: "function invest() payable public{\n    // fix:\n    //require(now<=closeTime);\n    require(raised < goal);\n    escrow.deposit.value(msg.value)(msg.sender);\n    raised += msg.value;\n  }"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{\n    // fix:\n    //require(now<=closeTime);\n    require(raised < goal);\n    escrow.deposit.value(msg.value)(msg.sender);\n    raised += msg.value;\n  }"
+      ExpressionStatement
+         Gas costs: 435
+         Source: "require(raised < goal)"
+        FunctionCall
+           Type: tuple()
+           Source: "require(raised < goal)"
+          Identifier require
+             Type: function (bool) pure
+             Source: "require"
+          BinaryOperation using operator <
+             Type: bool
+             Source: "raised < goal"
+            Identifier raised
+               Type: uint256
+               Source: "raised"
+            Identifier goal
+               Type: uint256
+               Source: "goal"
+      ExpressionStatement
+         Gas costs: [???]
+         Source: "escrow.deposit.value(msg.value)(msg.sender)"
+        FunctionCall
+           Type: tuple()
+           Source: "escrow.deposit.value(msg.value)(msg.sender)"
+          FunctionCall
+             Type: function (address) payable external
+             Source: "escrow.deposit.value(msg.value)"
+            MemberAccess to member value
+               Type: function (uint256) returns (function (address) payable external)
+               Source: "escrow.deposit.value"
+              MemberAccess to member deposit
+                 Type: function (address) payable external
+                 Source: "escrow.deposit"
+                Identifier escrow
+                   Type: contract Escrow
+                   Source: "escrow"
+            MemberAccess to member value
+               Type: uint256
+               Source: "msg.value"
+              Identifier msg
+                 Type: msg
+                 Source: "msg"
+          MemberAccess to member sender
+             Type: address payable
+             Source: "msg.sender"
+            Identifier msg
+               Type: msg
+               Source: "msg"
+      ExpressionStatement
+         Gas costs: 20232
+         Source: "raised += msg.value"
+        Assignment using operator +=
+           Type: uint256
+           Source: "raised += msg.value"
+          Identifier raised
+             Type: uint256
+             Source: "raised"
+          MemberAccess to member value
+             Type: uint256
+             Source: "msg.value"
+            Identifier msg
+               Type: msg
+               Source: "msg"
+  FunctionDefinition "close" - public
+     Source: "function close() public{\n    require(now > closeTime || raised >= goal);\n    if (raised >= goal) {\n      escrow.close();\n    } else {\n      escrow.refund();\n\t }\n  }"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{\n    require(now > closeTime || raised >= goal);\n    if (raised >= goal) {\n      escrow.close();\n    } else {\n      escrow.refund();\n\t }\n  }"
+      ExpressionStatement
+         Gas costs: 665
+         Source: "require(now > closeTime || raised >= goal)"
+        FunctionCall
+           Type: tuple()
+           Source: "require(now > closeTime || raised >= goal)"
+          Identifier require
+             Type: function (bool) pure
+             Source: "require"
+          BinaryOperation using operator ||
+             Type: bool
+             Source: "now > closeTime || raised >= goal"
+            BinaryOperation using operator >
+               Type: bool
+               Source: "now > closeTime"
+              Identifier now
+                 Type: uint256
+                 Source: "now"
+              Identifier closeTime
+                 Type: uint256
+                 Source: "closeTime"
+            BinaryOperation using operator >=
+               Type: bool
+               Source: "raised >= goal"
+              Identifier raised
+                 Type: uint256
+                 Source: "raised"
+              Identifier goal
+                 Type: uint256
+                 Source: "goal"
+      IfStatement
+         Source: "if (raised >= goal) {\n      escrow.close();\n    } else {\n      escrow.refund();\n\t }"
+        BinaryOperation using operator >=
+           Type: bool
+           Gas costs: 412
+           Source: "raised >= goal"
+          Identifier raised
+             Type: uint256
+             Source: "raised"
+          Identifier goal
+             Type: uint256
+             Source: "goal"
+        Block
+           Source: "{\n      escrow.close();\n    }"
+          ExpressionStatement
+             Gas costs: [???]
+             Source: "escrow.close()"
+            FunctionCall
+               Type: tuple()
+               Source: "escrow.close()"
+              MemberAccess to member close
+                 Type: function () external
+                 Source: "escrow.close"
+                Identifier escrow
+                   Type: contract Escrow
+                   Source: "escrow"
+        Block
+           Source: "{\n      escrow.refund();\n\t }"
+          ExpressionStatement
+             Gas costs: [???]
+             Source: "escrow.refund()"
+            FunctionCall
+               Type: tuple()
+               Source: "escrow.refund()"
+              MemberAccess to member refund
+                 Type: function () external
+                 Source: "escrow.refund"
+                Identifier escrow
+                   Type: contract Escrow
+                   Source: "escrow"

@@ -1,0 +1,625 @@
+{
+    "name": "ControlFlowGraph",
+    "root": "0x0",
+    "public_methods": [
+        "0x5d-0",
+        "0x68-0",
+        "0x4c-0"
+    ],
+    "private_methods": [],
+    "blocks": [
+        {
+            "address": "0x0",
+            "insts": [
+                "0x0: V0 = 0x80",
+                "0x2: V1 = 0x40",
+                "0x4: M[0x40] = 0x80",
+                "0x5: V2 = 0x4",
+                "0x7: V3 = CALLDATASIZE",
+                "0x8: V4 = LT V3 0x4",
+                "0x9: V5 = 0x4c",
+                "0xc: JUMPI 0x4c V4"
+            ],
+            "preds": [],
+            "succs": [
+                "0xd",
+                "0x4c"
+            ]
+        },
+        {
+            "address": "0xd",
+            "insts": [
+                "0xd: V6 = 0x0",
+                "0xf: V7 = CALLDATALOAD 0x0",
+                "0x10: V8 = 0x100000000000000000000000000000000000000000000000000000000",
+                "0x2f: V9 = DIV V7 0x100000000000000000000000000000000000000000000000000000000",
+                "0x30: V10 = 0xffffffff",
+                "0x35: V11 = AND 0xffffffff V9",
+                "0x37: V12 = 0x43d726d6",
+                "0x3c: V13 = EQ 0x43d726d6 V11",
+                "0x3d: V14 = 0x51",
+                "0x40: JUMPI 0x51 V13"
+            ],
+            "preds": [
+                "0x0"
+            ],
+            "succs": [
+                "0x41",
+                "0x51"
+            ]
+        },
+        {
+            "address": "0x41",
+            "insts": [
+                "0x42: V15 = 0xe8b5e51f",
+                "0x47: V16 = EQ 0xe8b5e51f V11",
+                "0x48: V17 = 0x68",
+                "0x4b: JUMPI 0x68 V16"
+            ],
+            "preds": [
+                "0xd"
+            ],
+            "succs": [
+                "0x68",
+                "0x4c"
+            ]
+        },
+        {
+            "address": "0x4c",
+            "insts": [
+                "0x4c: JUMPDEST ",
+                "0x4d: V18 = 0x0",
+                "0x50: REVERT 0x0 0x0"
+            ],
+            "preds": [
+                "0x0",
+                "0x41"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x51",
+            "insts": [
+                "0x51: JUMPDEST ",
+                "0x52: V19 = CALLVALUE",
+                "0x54: V20 = ISZERO V19",
+                "0x55: V21 = 0x5d",
+                "0x58: JUMPI 0x5d V20"
+            ],
+            "preds": [
+                "0xd"
+            ],
+            "succs": [
+                "0x5d",
+                "0x59"
+            ]
+        },
+        {
+            "address": "0x59",
+            "insts": [
+                "0x59: V22 = 0x0",
+                "0x5c: REVERT 0x0 0x0"
+            ],
+            "preds": [
+                "0x51"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x5d",
+            "insts": [
+                "0x5d: JUMPDEST ",
+                "0x5f: V23 = 0x66",
+                "0x62: V24 = 0x72",
+                "0x65: JUMP 0x72"
+            ],
+            "preds": [
+                "0x51"
+            ],
+            "succs": [
+                "0x72"
+            ]
+        },
+        {
+            "address": "0x66",
+            "insts": [
+                "0x66: JUMPDEST ",
+                "0x67: STOP "
+            ],
+            "preds": [
+                "0x1de"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x68",
+            "insts": [
+                "0x68: JUMPDEST ",
+                "0x69: V25 = 0x70",
+                "0x6c: V26 = 0x1e0",
+                "0x6f: JUMP 0x1e0"
+            ],
+            "preds": [
+                "0x41"
+            ],
+            "succs": [
+                "0x1e0"
+            ]
+        },
+        {
+            "address": "0x70",
+            "insts": [
+                "0x70: JUMPDEST ",
+                "0x71: STOP "
+            ],
+            "preds": [
+                "0x2c2"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x72",
+            "insts": [
+                "0x72: JUMPDEST ",
+                "0x73: V27 = 0x3",
+                "0x75: V28 = S[0x3]",
+                "0x76: V29 = TIMESTAMP",
+                "0x77: V30 = GT V29 V28",
+                "0x79: V31 = 0x86",
+                "0xff: S0 = V30",
+                "0x7c: JUMPI 0x86 V30"
+            ],
+            "preds": [
+                "0x5d"
+            ],
+            "succs": [
+                "0x86",
+                "0x7d"
+            ]
+        },
+        {
+            "address": "0x7d",
+            "insts": [
+                "0x7e: V32 = 0x2",
+                "0x80: V33 = S[0x2]",
+                "0x81: V34 = 0x1",
+                "0x83: V35 = S[0x1]",
+                "0x84: V36 = LT V35 V33",
+                "0x85: V37 = ISZERO V36",
+                "0xff: S0 = V37"
+            ],
+            "preds": [
+                "0x72"
+            ],
+            "succs": [
+                "0x86"
+            ]
+        },
+        {
+            "address": "0x86",
+            "insts": [
+                "0x86: JUMPDEST ",
+                "0x87: V38 = ISZERO S0",
+                "0x88: V39 = ISZERO V38",
+                "0x89: V40 = 0x91",
+                "0x8c: JUMPI 0x91 V39"
+            ],
+            "preds": [
+                "0x72",
+                "0x7d"
+            ],
+            "succs": [
+                "0x91",
+                "0x8d"
+            ]
+        },
+        {
+            "address": "0x8d",
+            "insts": [
+                "0x8d: V41 = 0x0",
+                "0x90: REVERT 0x0 0x0"
+            ],
+            "preds": [
+                "0x86"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x91",
+            "insts": [
+                "0x91: JUMPDEST ",
+                "0x92: V42 = 0x2",
+                "0x94: V43 = S[0x2]",
+                "0x95: V44 = 0x1",
+                "0x97: V45 = S[0x1]",
+                "0x98: V46 = LT V45 V43",
+                "0x99: V47 = ISZERO V46",
+                "0x9a: V48 = ISZERO V47",
+                "0x9b: V49 = 0x140",
+                "0x9e: JUMPI 0x140 V48"
+            ],
+            "preds": [
+                "0x86"
+            ],
+            "succs": [
+                "0x140",
+                "0x9f"
+            ]
+        },
+        {
+            "address": "0x9f",
+            "insts": [
+                "0x9f: V50 = 0x0",
+                "0xa3: V51 = S[0x0]",
+                "0xa5: V52 = 0x100",
+                "0xa8: V53 = EXP 0x100 0x0",
+                "0xaa: V54 = DIV V51 0x1",
+                "0xab: V55 = 0xffffffffffffffffffffffffffffffffffffffff",
+                "0xc0: V56 = AND 0xffffffffffffffffffffffffffffffffffffffff V54",
+                "0xc1: V57 = 0xffffffffffffffffffffffffffffffffffffffff",
+                "0xd6: V58 = AND 0xffffffffffffffffffffffffffffffffffffffff V56",
+                "0xd7: V59 = 0x43d726d6",
+                "0xdc: V60 = 0x40",
+                "0xde: V61 = M[0x40]",
+                "0xe0: V62 = 0xffffffff",
+                "0xe5: V63 = AND 0xffffffff 0x43d726d6",
+                "0xe6: V64 = 0x100000000000000000000000000000000000000000000000000000000",
+                "0x104: V65 = MUL 0x100000000000000000000000000000000000000000000000000000000 0x43d726d6",
+                "0x106: M[V61] = 0x43d726d600000000000000000000000000000000000000000000000000000000",
+                "0x107: V66 = 0x4",
+                "0x109: V67 = ADD 0x4 V61",
+                "0x10a: V68 = 0x0",
+                "0x10c: V69 = 0x40",
+                "0x10e: V70 = M[0x40]",
+                "0x111: V71 = SUB V67 V70",
+                "0x113: V72 = 0x0",
+                "0x117: V73 = EXTCODESIZE V58",
+                "0x118: V74 = ISZERO V73",
+                "0x11a: V75 = ISZERO V74",
+                "0x11b: V76 = 0x123",
+                "0x11e: JUMPI 0x123 V75"
+            ],
+            "preds": [
+                "0x91"
+            ],
+            "succs": [
+                "0x123",
+                "0x11f"
+            ]
+        },
+        {
+            "address": "0x11f",
+            "insts": [
+                "0x11f: V77 = 0x0",
+                "0x122: REVERT 0x0 0x0"
+            ],
+            "preds": [
+                "0x9f"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x123",
+            "insts": [
+                "0x123: JUMPDEST ",
+                "0x125: V78 = GAS",
+                "0x126: V79 = CALL V78 V58 0x0 V70 V71 V70 0x0",
+                "0x127: V80 = ISZERO V79",
+                "0x129: V81 = ISZERO V80",
+                "0x12a: V82 = 0x137",
+                "0x12d: JUMPI 0x137 V81"
+            ],
+            "preds": [
+                "0x9f"
+            ],
+            "succs": [
+                "0x12e",
+                "0x137"
+            ]
+        },
+        {
+            "address": "0x12e",
+            "insts": [
+                "0x12e: V83 = RETURNDATASIZE",
+                "0x12f: V84 = 0x0",
+                "0x132: RETURNDATACOPY 0x0 0x0 V83",
+                "0x133: V85 = RETURNDATASIZE",
+                "0x134: V86 = 0x0",
+                "0x136: REVERT 0x0 V85"
+            ],
+            "preds": [
+                "0x123"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x137",
+            "insts": [
+                "0x137: JUMPDEST ",
+                "0x13c: V87 = 0x1de",
+                "0x13f: JUMP 0x1de"
+            ],
+            "preds": [
+                "0x123"
+            ],
+            "succs": [
+                "0x1de"
+            ]
+        },
+        {
+            "address": "0x140",
+            "insts": [
+                "0x140: JUMPDEST ",
+                "0x141: V88 = 0x0",
+                "0x145: V89 = S[0x0]",
+                "0x147: V90 = 0x100",
+                "0x14a: V91 = EXP 0x100 0x0",
+                "0x14c: V92 = DIV V89 0x1",
+                "0x14d: V93 = 0xffffffffffffffffffffffffffffffffffffffff",
+                "0x162: V94 = AND 0xffffffffffffffffffffffffffffffffffffffff V92",
+                "0x163: V95 = 0xffffffffffffffffffffffffffffffffffffffff",
+                "0x178: V96 = AND 0xffffffffffffffffffffffffffffffffffffffff V94",
+                "0x179: V97 = 0x590e1ae3",
+                "0x17e: V98 = 0x40",
+                "0x180: V99 = M[0x40]",
+                "0x182: V100 = 0xffffffff",
+                "0x187: V101 = AND 0xffffffff 0x590e1ae3",
+                "0x188: V102 = 0x100000000000000000000000000000000000000000000000000000000",
+                "0x1a6: V103 = MUL 0x100000000000000000000000000000000000000000000000000000000 0x590e1ae3",
+                "0x1a8: M[V99] = 0x590e1ae300000000000000000000000000000000000000000000000000000000",
+                "0x1a9: V104 = 0x4",
+                "0x1ab: V105 = ADD 0x4 V99",
+                "0x1ac: V106 = 0x0",
+                "0x1ae: V107 = 0x40",
+                "0x1b0: V108 = M[0x40]",
+                "0x1b3: V109 = SUB V105 V108",
+                "0x1b5: V110 = 0x0",
+                "0x1b9: V111 = EXTCODESIZE V96",
+                "0x1ba: V112 = ISZERO V111",
+                "0x1bc: V113 = ISZERO V112",
+                "0x1bd: V114 = 0x1c5",
+                "0x1c0: JUMPI 0x1c5 V113"
+            ],
+            "preds": [
+                "0x91"
+            ],
+            "succs": [
+                "0x1c1",
+                "0x1c5"
+            ]
+        },
+        {
+            "address": "0x1c1",
+            "insts": [
+                "0x1c1: V115 = 0x0",
+                "0x1c4: REVERT 0x0 0x0"
+            ],
+            "preds": [
+                "0x140"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x1c5",
+            "insts": [
+                "0x1c5: JUMPDEST ",
+                "0x1c7: V116 = GAS",
+                "0x1c8: V117 = CALL V116 V96 0x0 V108 V109 V108 0x0",
+                "0x1c9: V118 = ISZERO V117",
+                "0x1cb: V119 = ISZERO V118",
+                "0x1cc: V120 = 0x1d9",
+                "0x1cf: JUMPI 0x1d9 V119"
+            ],
+            "preds": [
+                "0x140"
+            ],
+            "succs": [
+                "0x1d9",
+                "0x1d0"
+            ]
+        },
+        {
+            "address": "0x1d0",
+            "insts": [
+                "0x1d0: V121 = RETURNDATASIZE",
+                "0x1d1: V122 = 0x0",
+                "0x1d4: RETURNDATACOPY 0x0 0x0 V121",
+                "0x1d5: V123 = RETURNDATASIZE",
+                "0x1d6: V124 = 0x0",
+                "0x1d8: REVERT 0x0 V123"
+            ],
+            "preds": [
+                "0x1c5"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x1d9",
+            "insts": [
+                "0x1d9: JUMPDEST "
+            ],
+            "preds": [
+                "0x1c5"
+            ],
+            "succs": [
+                "0x1de"
+            ]
+        },
+        {
+            "address": "0x1de",
+            "insts": [
+                "0x1de: JUMPDEST ",
+                "0x1df: JUMP 0x66"
+            ],
+            "preds": [
+                "0x137",
+                "0x1d9"
+            ],
+            "succs": [
+                "0x66"
+            ]
+        },
+        {
+            "address": "0x1e0",
+            "insts": [
+                "0x1e0: JUMPDEST ",
+                "0x1e1: V125 = 0x2",
+                "0x1e3: V126 = S[0x2]",
+                "0x1e4: V127 = 0x1",
+                "0x1e6: V128 = S[0x1]",
+                "0x1e7: V129 = LT V128 V126",
+                "0x1e8: V130 = ISZERO V129",
+                "0x1e9: V131 = ISZERO V130",
+                "0x1ea: V132 = 0x1f2",
+                "0x1ed: JUMPI 0x1f2 V131"
+            ],
+            "preds": [
+                "0x68"
+            ],
+            "succs": [
+                "0x1ee",
+                "0x1f2"
+            ]
+        },
+        {
+            "address": "0x1ee",
+            "insts": [
+                "0x1ee: V133 = 0x0",
+                "0x1f1: REVERT 0x0 0x0"
+            ],
+            "preds": [
+                "0x1e0"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x1f2",
+            "insts": [
+                "0x1f2: JUMPDEST ",
+                "0x1f3: V134 = 0x0",
+                "0x1f7: V135 = S[0x0]",
+                "0x1f9: V136 = 0x100",
+                "0x1fc: V137 = EXP 0x100 0x0",
+                "0x1fe: V138 = DIV V135 0x1",
+                "0x1ff: V139 = 0xffffffffffffffffffffffffffffffffffffffff",
+                "0x214: V140 = AND 0xffffffffffffffffffffffffffffffffffffffff V138",
+                "0x215: V141 = 0xffffffffffffffffffffffffffffffffffffffff",
+                "0x22a: V142 = AND 0xffffffffffffffffffffffffffffffffffffffff V140",
+                "0x22b: V143 = 0xf340fa01",
+                "0x230: V144 = CALLVALUE",
+                "0x231: V145 = CALLER",
+                "0x232: V146 = 0x40",
+                "0x234: V147 = M[0x40]",
+                "0x236: V148 = 0xffffffff",
+                "0x23b: V149 = AND 0xffffffff 0xf340fa01",
+                "0x23c: V150 = 0x100000000000000000000000000000000000000000000000000000000",
+                "0x25a: V151 = MUL 0x100000000000000000000000000000000000000000000000000000000 0xf340fa01",
+                "0x25c: M[V147] = 0xf340fa0100000000000000000000000000000000000000000000000000000000",
+                "0x25d: V152 = 0x4",
+                "0x25f: V153 = ADD 0x4 V147",
+                "0x262: V154 = 0xffffffffffffffffffffffffffffffffffffffff",
+                "0x277: V155 = AND 0xffffffffffffffffffffffffffffffffffffffff V145",
+                "0x278: V156 = 0xffffffffffffffffffffffffffffffffffffffff",
+                "0x28d: V157 = AND 0xffffffffffffffffffffffffffffffffffffffff V155",
+                "0x28f: M[V153] = V157",
+                "0x290: V158 = 0x20",
+                "0x292: V159 = ADD 0x20 V153",
+                "0x296: V160 = 0x0",
+                "0x298: V161 = 0x40",
+                "0x29a: V162 = M[0x40]",
+                "0x29d: V163 = SUB V159 V162",
+                "0x2a2: V164 = EXTCODESIZE V142",
+                "0x2a3: V165 = ISZERO V164",
+                "0x2a5: V166 = ISZERO V165",
+                "0x2a6: V167 = 0x2ae",
+                "0x2a9: JUMPI 0x2ae V166"
+            ],
+            "preds": [
+                "0x1e0"
+            ],
+            "succs": [
+                "0x2ae",
+                "0x2aa"
+            ]
+        },
+        {
+            "address": "0x2aa",
+            "insts": [
+                "0x2aa: V168 = 0x0",
+                "0x2ad: REVERT 0x0 0x0"
+            ],
+            "preds": [
+                "0x1f2"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x2ae",
+            "insts": [
+                "0x2ae: JUMPDEST ",
+                "0x2b0: V169 = GAS",
+                "0x2b1: V170 = CALL V169 V142 V144 V162 V163 V162 0x0",
+                "0x2b2: V171 = ISZERO V170",
+                "0x2b4: V172 = ISZERO V171",
+                "0x2b5: V173 = 0x2c2",
+                "0x2b8: JUMPI 0x2c2 V172"
+            ],
+            "preds": [
+                "0x1f2"
+            ],
+            "succs": [
+                "0x2c2",
+                "0x2b9"
+            ]
+        },
+        {
+            "address": "0x2b9",
+            "insts": [
+                "0x2b9: V174 = RETURNDATASIZE",
+                "0x2ba: V175 = 0x0",
+                "0x2bd: RETURNDATACOPY 0x0 0x0 V174",
+                "0x2be: V176 = RETURNDATASIZE",
+                "0x2bf: V177 = 0x0",
+                "0x2c1: REVERT 0x0 V176"
+            ],
+            "preds": [
+                "0x2ae"
+            ],
+            "succs": []
+        },
+        {
+            "address": "0x2c2",
+            "insts": [
+                "0x2c2: JUMPDEST ",
+                "0x2c8: V178 = CALLVALUE",
+                "0x2c9: V179 = 0x1",
+                "0x2cb: V180 = 0x0",
+                "0x2cf: V181 = S[0x1]",
+                "0x2d0: V182 = ADD V181 V178",
+                "0x2d6: S[0x1] = V182",
+                "0x2d8: JUMP 0x70"
+            ],
+            "preds": [
+                "0x2ae"
+            ],
+            "succs": [
+                "0x70"
+            ]
+        },
+        {
+            "address": "0x2d9",
+            "insts": [
+                "0x2d9: INVALID ",
+                "0x2da: LOG S0 S1 S2",
+                "0x2db: V183 = 0x627a7a723058",
+                "0x2e2: V184 = SHA3 0x627a7a723058 S3",
+                "0x2e3: V185 = 0x94343a1702f61a2ca1699e72b68d26611d84d90267df1b4b90e8a8",
+                "0x2ff: MISSING 0x2f",
+                "0x300: MISSING 0xa6",
+                "0x301: V186 = 0x20029"
+            ],
+            "preds": [],
+            "succs": []
+        }
+    ]
+}

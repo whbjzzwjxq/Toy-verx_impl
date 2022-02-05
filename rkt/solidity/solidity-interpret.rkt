@@ -1,6 +1,11 @@
 #lang s-exp rosette
-(require "../simulator-rosette.rkt" "../ops-rosette.rkt" 
-  "../inst.rkt" "solidity-machine.rkt" graph rosette/lib/match rosette/lib/angelic)
+(require 
+  "../simulator-rosette.rkt"
+  "../ops-rosette.rkt" 
+  "../inst.rkt"
+  "solidity-machine.rkt"
+  graph rosette/lib/match rosette/lib/angelic
+)
 (require (prefix-in unsafe- (only-in racket box set-box! unbox)))
 
 (provide solidity-simulator-rosette%)

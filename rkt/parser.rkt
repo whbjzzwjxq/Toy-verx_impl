@@ -1,7 +1,9 @@
 #lang racket
 
-(require parser-tools/lex
-         (prefix-in re- parser-tools/lex-sre))
+(require 
+  parser-tools/lex
+  (prefix-in re- parser-tools/lex-sre)
+)
 
 (provide (all-defined-out))
 
