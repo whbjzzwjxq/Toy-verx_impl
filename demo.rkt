@@ -3,10 +3,12 @@
 (require 
     rosette/lib/destruct
     errortrace
-    racket/struct
     racket/format
+    racket/syntax-srcloc
     math/base
 )
+
+(require syntax/quote)
 
 ; Constants
 (define OPEN 'OPEN)
@@ -33,40 +35,46 @@
 ))
 
 (struct message (sender value) #:transparent)
-(struct always (formula) #:transparent)
-(struct once (formula) #:transparent)
-(struct previous (formula) #:transparent)
 
 ; Temporal Logic
+(struct previous (formula state) #:transparent)
+(struct since (formula state given_state) #:transparent)
 
-(define expr_status (make-hash))
-
-(define (get_expr_status expr default) (hash-ref expr_status (quote expr) default))
-(define (set_expr_status expr value) (hash-set! expr_status (quote expr) value))
+(struct once (formula state) #:transparent)
+(struct always (formula state) #:transparent)
+(struct still (formula state) #:transparent)
 
 (define (eval_expr temporal_expr) (
   destruct temporal_expr
-    [(always formula) (
-      let ([cur (and (eval_expr formula) (get_expr_status formula #t))])
-      (begin
-        (set_expr_status formula cur)
-        cur
+    [(previous formula state) (
+      if (null? (get-field last_state state))
+      #f
+      (eval_expr (formula (get-field last_state state)))
+    )]
+
+    ; Not check whether given_state is non_moment
+    [(since formula state given_state) (
+      or 
+      (eval_expr (formula state)) 
+      (if (null? (get-field last_state state))
+        #f
+        (since formula (get-field last_state state))
       )
     )]
-    [(once formula) (
-      let ([cur (or (eval_expr formula) (get_expr_status formula #f))])
-      (begin
-        (set_expr_status formula cur)
-        cur
+
+    [(once formula state) (
+      since formula state (first states)
+    )]
+
+    [(always formula state) (
+      and
+      (eval_expr (formula state)) 
+      (if (null? (get-field last_state state))
+        #t
+        (always formula (get-field last_state state))
       )
     )]
-    [(previous formula) (
-      let ([cur (get_expr_status formula #f)])
-        (begin
-          (set_expr_status formula (eval_expr formula) 
-          cur
-        ))
-    )]
+
     [_ temporal_expr]
 ))
 
@@ -78,31 +86,53 @@
 (define (close_sale_req state) (or (> (get-field now state) CLOSE_TIME) (>= (get-field raised state) GOAL)))
 
 ; Requirements
-(define (r0 state) (always (
-  equal? 
-  (send state balance)
-  (send state expected_refund)
-)))
+(define (r0 state) (always 
+  (lambda (state)
+    (equal? 
+      (send state balance) 
+      (send state expected_refund)
+    )
+  )
+  state
+))
 
-(define (r1 state) (always (
-  or 
-  (equal? (get-field crowdsale_state state) SUCCESS) 
-  (>= (send state balance) (send state sum_deposits))
-)))
+(define (r1 state) (always
+  (lambda (state) 
+    (or
+      (equal? (get-field crowdsale_state state) SUCCESS) 
+      (>= (send state balance) (send state sum_deposits))
+    )
+  )
+  state
+))
 
-(define (r2 state) (always (
-  nand
-    (once (get-field refund_called state))
-    (once (get-field withdraw_called state))
-)))
+(define (r2 state) (always
+  (lambda (state)
+    (nand
+      (once (lambda (state) (get-field refund_called state)) state)
+      (once (lambda (state) (get-field withdraw_called state)) state)
+    )
+  )
+  state
+))
 
-(define (r3 state) (always (
-  nand
-    (once (previous (>= (send state sum_deposits) GOAL)))
-    (get-field refund_called state)
-)))
+(define (r3 state) (always
+  (lambda (state)
+    (nand
+      (once (lambda (state) 
+        (previous (lambda (state) 
+          (>= (send state sum_deposits) GOAL)
+        ) state)
+      ) state)
+      (get-field refund_called state)
+    )
+  )
+  state
+))
 
 (define reqs (list r0 r1 r2 r3))
+
+(define (check_req state) (map (lambda (req) (eval_expr (req state))) reqs))
 
 ; State
 (define state%
@@ -200,6 +230,15 @@
         [last_state this]
     ))
 
+    (define/public (non_moment state) (
+      if (equal? this state)
+        #t
+        (if (null? last_state)
+          #f
+          (send last_state non_moment state)
+        )
+    ))
+
     (define/public (custom-print port quoting-depth) (
       print (~a 
         "Now " now ";"
@@ -208,7 +247,7 @@
 
         "RefundCalled " refund_called ";"
         "WithdrawCalled " withdraw_called ";"
-        "ExtCallFailed " external_call_failed ";"
+        ; "ExtCallFailed " external_call_failed ";"
 
         "Deposits " deposits ";"
         "Accounts " accounts ";"
@@ -297,9 +336,6 @@
         (set-field! cur_message cur_state message)
         (interpret callable)
         (add_state)
-        (pretty-print callable)
-        (pretty-print cur_state)
-        (pretty-print (map (lambda (req) (eval_expr (req cur_state))) reqs))
       )]
 
       [(external_call callable message) (
@@ -319,4 +355,4 @@
 (interpret (internal_call (invest) (message USER_ID HALF_GOAL)))
 (interpret (internal_call (close_sale) (message OWNER_ID 0)))
 (interpret (internal_call (claim_refund USER_ID) (message USER_ID 0)))
-(pretty-print (map (lambda (req) (eval_expr (req cur_state))) reqs))
+(check_req cur_state)
