@@ -8,8 +8,6 @@
     math/base
 )
 
-(require syntax/quote)
-
 ; Constants
 (define OPEN 'OPEN)
 (define SUCCESS 'SUCCESS)
@@ -37,45 +35,71 @@
 (struct message (sender value) #:transparent)
 
 ; Temporal Logic
-(struct previous (formula state) #:transparent)
-(struct since (formula state given_state) #:transparent)
+(struct tm_pred () #:transparent)
+(struct previous tm_pred (formula state) #:transparent)
+(struct since tm_pred (formula state given_state) #:transparent)
 
-(struct once (formula state) #:transparent)
-(struct always (formula state) #:transparent)
-(struct still (formula state) #:transparent)
+(struct once tm_pred (formula state) #:transparent)
+(struct always tm_pred (formula state) #:transparent)
+(struct still tm_pred (formula state) #:transparent)
 
-(define (eval_expr temporal_expr) (
-  destruct temporal_expr
+(struct t_and (x y) #:transparent)
+(struct t_nand (x y) #:transparent)
+(struct t_or (x y) #:transparent)
+
+(define (eval_expr _expr) (
+  destruct _expr
     [(previous formula state) (
-      if (null? (get-field last_state state))
+      if (null? (get_last state))
       #f
-      (eval_expr (formula (get-field last_state state)))
+      (eval_expr (formula (get_last state)))
     )]
 
     ; Not check whether given_state is non_moment
     [(since formula state given_state) (
-      or 
-      (eval_expr (formula state)) 
-      (if (null? (get-field last_state state))
+      or
+      (eval_expr (formula state))
+      (if (null? (get_last state))
         #f
-        (since formula (get-field last_state state))
+        (if (or (null? given_state) (not (equal? (get-field last_state given_state) state)))
+          (eval_expr (since formula (get_last state) given_state))
+          #f
+        )
       )
     )]
 
     [(once formula state) (
-      since formula state (first states)
+      eval_expr (since formula state null)
     )]
 
     [(always formula state) (
       and
-      (eval_expr (formula state)) 
-      (if (null? (get-field last_state state))
+      (eval_expr (formula state))
+      (if (null? (get_last state))
         #t
-        (always formula (get-field last_state state))
+        (eval_expr (always formula (get_last state)))
       )
     )]
 
-    [_ temporal_expr]
+    [(t_and x y) (
+      and
+      (eval_expr x)
+      (eval_expr y)
+    )]
+
+    [(t_nand x y) (
+      nand
+      (eval_expr x)
+      (eval_expr y)
+    )]
+
+    [(t_or x y) (
+      and
+      (eval_expr x)
+      (eval_expr y)
+    )]
+
+    [_ _expr]
 ))
 
 ; Conditions
@@ -88,16 +112,19 @@
 ; Requirements
 (define (r0 state) (always 
   (lambda (state)
-    (equal? 
-      (send state balance) 
-      (send state expected_refund)
+    (or 
+      (not (get-field last_refund_called state))
+      (equal?
+        (send state balance) 
+        (send state expected_refund)
+      )
     )
   )
   state
 ))
 
 (define (r1 state) (always
-  (lambda (state) 
+  (lambda (state)
     (or
       (equal? (get-field crowdsale_state state) SUCCESS) 
       (>= (send state balance) (send state sum_deposits))
@@ -108,7 +135,7 @@
 
 (define (r2 state) (always
   (lambda (state)
-    (nand
+    (t_nand
       (once (lambda (state) (get-field refund_called state)) state)
       (once (lambda (state) (get-field withdraw_called state)) state)
     )
@@ -118,7 +145,7 @@
 
 (define (r3 state) (always
   (lambda (state)
-    (nand
+    (t_nand
       (once (lambda (state) 
         (previous (lambda (state) 
           (>= (send state sum_deposits) GOAL)
@@ -143,6 +170,7 @@
       [crowdsale_state OPEN]
       [raised 0]
 
+      [last_refund_called #f]
       [refund_called #f]
       [withdraw_called #f]
       [external_call_failed #f]
@@ -213,22 +241,14 @@
     ))
 
     (define/public (deepcopy) (
-      new state% 
-        [now now] 
-        [crowdsale_state crowdsale_state]
-        [raised raised]
-
-        [refund_called refund_called]
-        [withdraw_called withdraw_called]
-        [external_call_failed external_call_failed]
-
-        [deposits deposits]
-        [accounts accounts]
-        [cur_message cur_message]
-
-        [last_refund_addr last_refund_addr]
-        [last_state this]
-    ))
+      let ([new_state (new state%)]) (
+        begin
+        (for ([name (field-names this)]) (
+          dynamic-set-field! name new_state (dynamic-get-field name this)
+        ))
+        (set-field! last_state new_state this)
+        new_state
+    )))
 
     (define/public (non_moment state) (
       if (equal? this state)
@@ -253,8 +273,9 @@
         "Accounts " accounts ";"
         "Message " cur_message ";"
 
+        "LastRefundCalled" last_refund_called ";"
         "LastRefundAddr " last_refund_addr ";"
-        "HasLastState " (null? last_state) ";"
+        "IsRoot " (null? last_state) ";"
       )
       port
     ))
@@ -269,14 +290,15 @@
 
 (define cur_state (new state%))
 (define (get_cur_message) (get-field cur_message cur_state))
-(define states (list cur_state))
-(define (add_state) (set! states (append states (list (
-    let ([cur (send cur_state deepcopy)]) (
-      begin
-      (set-field! last_state cur (last states))
-      cur
-    )
-)))))
+(define (print_states state) (
+  begin
+  (pretty-print state)
+  (unless (null? (get_last state))
+    (print_states (get_last state))
+  )
+))
+(define (overflow_time) (set-field! now cur_state (+ CLOSE_TIME 1)))
+(define (get_last state) (get-field last_state state))
 
 (struct set_close () #:transparent)
 (struct set_refund () #:transparent)
@@ -312,8 +334,11 @@
 
       [(claim_refund address) (
         when (claim_refund_req cur_state) (
-          let ([amount (send cur_state refund_deposit address)])
-          (interpret (external_call (send cur_state transfer_value CONTRACT_ID address amount) (get_cur_message)))
+          let ([amount (send cur_state refund_deposit address)]) (
+            begin
+            (set-field! last_refund_called cur_state #t)
+            (interpret (external_call (send cur_state transfer_value CONTRACT_ID address amount) (get_cur_message)))
+          )
         )
       )]
 
@@ -330,12 +355,13 @@
           )
       )]
 
-      ; Utils
+      ; Calls
       [(internal_call callable message) (
         begin
+        (set! cur_state (send cur_state deepcopy))
         (set-field! cur_message cur_state message)
+        (set-field! last_refund_called cur_state #f)
         (interpret callable)
-        (add_state)
       )]
 
       [(external_call callable message) (
@@ -351,8 +377,9 @@
 ))
 
 ; BugTrace 1
-(set-field! now cur_state (+ CLOSE_TIME 1))
+(overflow_time)
 (interpret (internal_call (invest) (message USER_ID HALF_GOAL)))
-(interpret (internal_call (close_sale) (message OWNER_ID 0)))
-(interpret (internal_call (claim_refund USER_ID) (message USER_ID 0)))
+; (interpret (internal_call (close_sale) (message OWNER_ID 0)))
+; (interpret (internal_call (claim_refund USER_ID) (message USER_ID 0)))
 (check_req cur_state)
+(print_states cur_state)
