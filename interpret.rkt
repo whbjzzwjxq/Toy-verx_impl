@@ -14,41 +14,6 @@
 (define (claim_refund_req state) (equal? (state-crowdsale_state state) REFUND))
 (define (close_sale_req state) (or (> (state-now state) CLOSE_TIME) (>= (state-raised state) GOAL)))
 
-(define-grammar (req raised goal now close)
-  [top_expr
-    (choose
-      ((bop) (compare) (compare))
-      (compare)
-    )
-  ]
-  [compare
-    (choose
-      ((cmp) raised goal)
-      ((cmp) now close)
-      #t
-      #f
-    )
-  ]
-  [cmp
-    (choose >= > = <= <)
-  ]
-  [bop
-   (choose && || xor )
-  ]
-)
-
-; Autofix here
-(define (invest_req state) (req (state-raised state) GOAL (state-now state) CLOSE_TIME #:depth 4))
-(define-symbolic now integer?)
-
-; Origin
-; (define now 0)
-; (define (invest_req state) (< (state-raised state) GOAL))
-
-; Right Answer
-; (define (invest_req state) (and (< (state-raised state) GOAL) (<= (state-now state) CLOSE_TIME)))
-; (define-symbolic now integer?)
-
 
 (struct set_close () #:transparent)
 (struct set_refund () #:transparent)
@@ -112,12 +77,12 @@
             (
               begin
               (vector-set! (state-deposits cur_state) address 0)
-              (interpret
-                (external_call
-                  (refund address amount)
-                  (state-cur_message cur_state)
+                (let
+                  ([res (interpret
+                    (external_call (refund address amount) (state-cur_message cur_state)))
+                  ])
+                  (unless res (fallback_sketch cur_state address amount))
                 )
-              )
             )
           )
         )
@@ -158,10 +123,14 @@
       [(external_call callable message) (
         begin
         (set-state-cur_message! cur_state message)
-        (if (state-external_call_failed cur_state)
+        (let ([failed (state-external_call_failed cur_state)]) (
+          begin
+          (if (state-external_call_failed cur_state)
             (set-state-external_call_failed! cur_state #f)
             (interpret callable)
-        )
+          )
+          (not failed)
+        ))
       )]
 
       ; Utils
@@ -174,8 +143,96 @@
       )]
 
       [(refund address value) (
-        transfer-value cur_state CONTRACT_ID address value
+        begin
+        ; (pretty-print 'Coming-refund)
+        ; (pretty-print (cons address value))
+        (transfer-value cur_state CONTRACT_ID address value)
       )]
 
       [_ p]
 ))
+
+(define-grammar (fallback state address amount)
+  [top_expr
+    (choose
+      ((sub-expr))
+      (begin (sub-expr) (sub-expr))
+    )
+  ]
+  [sub-expr
+    (choose
+      (internal_call ((calls)) (message OWNER_ID amount))
+      (add-deposit state address amount)
+      (add-account state address amount)
+      (set-state-last_refund_called! state (bool))
+      ; (set-state-refund_called! state (bool))
+      (set-state-last_refund_addr! state null)
+    )
+  ]
+  [calls
+    (choose
+      set_close
+      set_refund
+      deposit
+      withdraw
+      claim_refund
+      refund
+      invest
+      close_sale
+    )
+  ]
+  [bool
+    (choose
+      #t
+      #f
+    )
+  ]
+)
+
+(define-grammar (req raised goal now close)
+  [top_expr
+    (choose
+      ((bop) (compare) (compare))
+      (compare)
+    )
+  ]
+  [compare
+    (choose
+      ((cmp) raised goal)
+      ((cmp) now close)
+      #t
+      #f
+    )
+  ]
+  [cmp
+    (choose >= > = <= <)
+  ]
+  [bop
+   (choose && || xor )
+  ]
+)
+
+; Autofix here
+(define (fallback_sketch state address amount)
+  (fallback cur_state address amount #:depth 4)
+)
+
+(define-symbolic now integer?)
+(define (invest_req state) (req (state-raised state) GOAL (state-now state) CLOSE_TIME #:depth 4))
+
+; ; Right Answer
+; (define (fallback_sketch state address amount) (
+;   begin
+;   (set-state-last_refund_called! cur_state #f)
+;   (add-deposit cur_state address amount)
+; ))
+
+; (define now 0)
+; (define (invest_req state) (<= (state-now state) CLOSE_TIME))
+
+; ; Origin
+; (define (fallback_sketch state address amount) (
+;   pretty-print "DoNothing"
+; ))
+; (define now 0)
+; (define (invest_req state) (< (state-raised state) GOAL))

@@ -54,7 +54,27 @@
   state
 ))
 
-(define reqs (list r0 r1 r2 r3))
+(define (r4 state) (always
+  (lambda (state)
+    (let ([accounts (state-accounts state)]) (
+      &&
+        (>= (vector-ref accounts 0) 0)
+        (>= (vector-ref accounts 1) 0)
+        (>= (vector-ref accounts 2) 0)
+        (>= (vector-ref accounts 3) 0)
+    ))
+  )
+  state
+))
+
+(define (r5 state) (always
+  (lambda (state)
+    (equal? (sum-accounts state) ALL_VALUE)
+  )
+  state
+))
+
+(define reqs (list r0 r1 r2 r3 r4 r5))
 ; (define reqs (list r0))
 
 (define (check-req state) (map (lambda (req) (eval-temp-expr (req state))) reqs))

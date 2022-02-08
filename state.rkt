@@ -24,6 +24,7 @@
 (define ZERO 0)
 (define HALF_GOAL (/ GOAL 2))
 (define OVERFLOW_GOAL (+ GOAL 1))
+(define ALL_VALUE (* OVERFLOW_GOAL 2))
 
 (struct message (sender value) #:transparent)
 (define (default-message) (message OWNER_ID 0))
@@ -80,7 +81,7 @@
     #f
     #f
     (default-vec)
-    (vector 0 0 0 OVERFLOW_GOAL)
+    (vector 0 0 0 ALL_VALUE)
     (default-message)
     null
     null
@@ -126,6 +127,10 @@
 
 (define (sum-deposits state) (
   apply + (vector->list (state-deposits state))
+))
+
+(define (sum-accounts state) (
+  apply + (vector->list (state-accounts state))
 ))
 
 (define (transfer-value state from to value) (
