@@ -4,22 +4,30 @@
   "./state.rkt"
   "./interpret.rkt"
   "./property.rkt"
+  rosette/lib/synthax
 )
 
 (define (exec calls) (
   begin
-  (init-state)
+  (set! cur_state (init-state))
+  (set-state-now! cur_state now)
   (for ([c calls]) (
     interpret (internal_call ((car c)) (cdr c))
   ))
   ; (print-states cur_state)
-  (check-req cur_state)
+  cur_state
 ))
 
 
 ; Normal Trace
 
-(define (normal) (exec 
+(define (normal1) (exec 
+  (list 
+    (cons invest (message USER_ID HALF_GOAL))
+  )
+))
+
+(define (normal2) (exec 
   (list 
     (cons invest (message USER_ID HALF_GOAL))
     (cons set_overflow_time (default-message))
@@ -41,12 +49,23 @@
   )
 ))
 
-(define (solver) (solve
-    (begin
-      ; (assert (equal? '(#t #t #t #t) normal))
-      (assert (equal? '(#t #t #t #t) (normal)))
-    )
+(define syn (synthesize
+  #:forall (list now)
+  #:guarantee
+  (begin
+    (assume (>= now 0))
+    (assume (<= now CLOSE_TIME))
+    (assert (equal? (get-balance (normal1)) HALF_GOAL))
+    (assert (equal? '(#t #t #t #t) (check-req (normal2))))
+    (assert (equal? '(#t #t #t #t) (check-req (bug_trace1))))
+  )
 ))
 
-(solver)
-; (pretty-print (normal))
+(if (sat? syn)
+  (
+    begin
+    (pretty-print 'sat)
+    (print-forms syn)
+  )
+  (pretty-print 'unsat)
+)

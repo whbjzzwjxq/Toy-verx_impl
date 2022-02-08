@@ -2,22 +2,52 @@
 
 (require 
   rosette/lib/destruct
+  rosette/lib/synthax
   "./state.rkt"
 )
 
 (provide (all-defined-out))
 
 ; Conditions
-
-(define-symbolic x integer?)
-
 (define (only_owner state) (equal? (get-msg-sender state) OWNER_ID))
 (define (withdraw_req state) (equal? (state-crowdsale_state state) SUCCESS))
 (define (claim_refund_req state) (equal? (state-crowdsale_state state) REFUND))
-; (define (invest_req state) (and (< (get-field raised state) GOAL) (<= (get-field now state) CLOSE_TIME)))
-; (define (invest_req state) (and (< (state-raised state) GOAL) (<= (state-now state) x)))
-(define (invest_req state) (< (state-raised state) GOAL))
 (define (close_sale_req state) (or (> (state-now state) CLOSE_TIME) (>= (state-raised state) GOAL)))
+
+(define-grammar (req raised goal now close)
+  [top_expr
+    (choose
+      ((bop) (compare) (compare))
+      (compare)
+    )
+  ]
+  [compare
+    (choose
+      ((cmp) raised goal)
+      ((cmp) now close)
+      #t
+      #f
+    )
+  ]
+  [cmp
+    (choose >= > = <= <)
+  ]
+  [bop
+   (choose && || xor )
+  ]
+)
+
+; Autofix here
+(define (invest_req state) (req (state-raised state) GOAL (state-now state) CLOSE_TIME #:depth 4))
+(define-symbolic now integer?)
+
+; Origin
+; (define now 0)
+; (define (invest_req state) (< (state-raised state) GOAL))
+
+; Right Answer
+; (define (invest_req state) (and (< (state-raised state) GOAL) (<= (state-now state) CLOSE_TIME)))
+; (define-symbolic now integer?)
 
 
 (struct set_close () #:transparent)
