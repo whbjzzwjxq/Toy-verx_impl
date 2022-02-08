@@ -247,6 +247,8 @@
           dynamic-set-field! name new_state (dynamic-get-field name this)
         ))
         (set-field! last_state new_state this)
+        (set-field! deposits new_state (vector-copy deposits))
+        (set-field! accounts new_state (vector-copy accounts))
         new_state
     )))
 
@@ -267,7 +269,7 @@
 
         "RefundCalled " refund_called ";"
         "WithdrawCalled " withdraw_called ";"
-        ; "ExtCallFailed " external_call_failed ";"
+        "ExtCallFailed " external_call_failed ";"
 
         "Deposits " deposits ";"
         "Accounts " accounts ";"
@@ -297,7 +299,8 @@
     (print_states (get_last state))
   )
 ))
-(define (overflow_time) (set-field! now cur_state (+ CLOSE_TIME 1)))
+(define (set_overflow_time) (set-field! now cur_state (+ CLOSE_TIME 1)))
+(define (set_external_call_failed) (set-field! external_call_failed cur_state #t))
 (define (get_last state) (get-field last_state state))
 
 (struct set_close () #:transparent)
@@ -337,7 +340,7 @@
           let ([amount (send cur_state refund_deposit address)]) (
             begin
             (set-field! last_refund_called cur_state #t)
-            (interpret (external_call (send cur_state transfer_value CONTRACT_ID address amount) (get_cur_message)))
+            (interpret (external_call (refund address amount) (get_cur_message)))
           )
         )
       )]
@@ -353,6 +356,11 @@
               (interpret (internal_call (set_close) (get_cur_message)))
               (interpret (internal_call (set_refund) (get_cur_message)))
           )
+      )]
+
+      ; Utils
+      [(refund address value) (
+        send cur_state transfer_value CONTRACT_ID address value
       )]
 
       ; Calls
@@ -377,9 +385,10 @@
 ))
 
 ; BugTrace 1
-(overflow_time)
+(set_overflow_time)
+(set_external_call_failed)
 (interpret (internal_call (invest) (message USER_ID HALF_GOAL)))
-; (interpret (internal_call (close_sale) (message OWNER_ID 0)))
-; (interpret (internal_call (claim_refund USER_ID) (message USER_ID 0)))
+(interpret (internal_call (close_sale) (message OWNER_ID 0)))
+(interpret (internal_call (claim_refund USER_ID) (message USER_ID 0)))
 (check_req cur_state)
 (print_states cur_state)
