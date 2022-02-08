@@ -33,6 +33,7 @@
 ))
 
 (struct message (sender value) #:transparent)
+(define default_message (message OWNER_ID 0))
 
 ; Temporal Logic
 (struct tm_pred () #:transparent)
@@ -177,7 +178,7 @@
 
       [deposits (make-vector USER_NUM 0)]
       [accounts (vector 0 0 0 OVERFLOW_MONEY)]
-      [cur_message (message OWNER_ID 0)]
+      [cur_message default_message]
 
       [last_refund_addr null]
       [last_state null]
@@ -219,8 +220,6 @@
     (define/public (refund_deposit address) (
       let ([cur (vector-ref deposits address)])
         (begin
-          (set! last_refund_addr address)
-          (set! refund_called #t)
           (vector-set! deposits address 0)
           cur
         )
@@ -275,7 +274,7 @@
         "Accounts " accounts ";"
         "Message " cur_message ";"
 
-        "LastRefundCalled" last_refund_called ";"
+        ; "LastRefundCalled " last_refund_called ";"
         "LastRefundAddr " last_refund_addr ";"
         "IsRoot " (null? last_state) ";"
       )
@@ -290,7 +289,8 @@
       display (~a "Display " "\n") port)))
 )
 
-(define cur_state (new state%))
+(define cur_state null)
+(define (init_state) (set! cur_state (new state%)))
 (define (get_cur_message) (get-field cur_message cur_state))
 (define (print_states state) (
   begin
@@ -299,15 +299,12 @@
     (print_states (get_last state))
   )
 ))
-(define (set_overflow_time) (set-field! now cur_state (+ CLOSE_TIME 1)))
-(define (set_external_call_failed) (set-field! external_call_failed cur_state #t))
 (define (get_last state) (get-field last_state state))
 
 (struct set_close () #:transparent)
 (struct set_refund () #:transparent)
-(struct deposit (address) #:transparent)
 (struct withdraw () #:transparent)
-(struct claim_refund (address) #:transparent)
+(struct claim_refund () #:transparent)
 (struct refund (address value) #:transparent)
 
 (struct invest () #:transparent)
@@ -315,6 +312,10 @@
 
 (struct internal_call (callable message) #:transparent)
 (struct external_call (callable message) #:transparent)
+
+(struct set_overflow_time () #:transparent)
+(struct set_external_call_failed () #:transparent)
+
 
 (define (interpret p)
     (destruct p
@@ -327,20 +328,21 @@
           when (only_owner cur_state) (send cur_state set_crowdsale_state REFUND)
       )]
 
-      [(deposit address) (
-          send cur_state deposit address
-      )]
-
       [(withdraw) (
           when (withdraw_req cur_state) (send cur_state withdraw)
       )]
 
-      [(claim_refund address) (
+      [(claim_refund) (
         when (claim_refund_req cur_state) (
-          let ([amount (send cur_state refund_deposit address)]) (
-            begin
-            (set-field! last_refund_called cur_state #t)
-            (interpret (external_call (refund address amount) (get_cur_message)))
+          begin
+          (set-field! last_refund_addr cur_state (message-sender (get_cur_message)))
+          (set-field! refund_called cur_state #t)
+          (set-field! last_refund_called cur_state #t)
+          (interpret
+            (external_call 
+              (refund (message-sender (get_cur_message)) (send cur_state refund_deposit (message-sender (get_cur_message))))
+              (get_cur_message)
+            )
           )
         )
       )]
@@ -381,14 +383,42 @@
         )
       )]
 
+      ; Utils
+      [(set_overflow_time) (
+        set-field! now cur_state (+ CLOSE_TIME 1)
+      )]
+
+      [(set_external_call_failed) (
+        set-field! external_call_failed cur_state #t
+      )]
+
       [_ p]
 ))
 
-; BugTrace 1
-(set_overflow_time)
-(set_external_call_failed)
-(interpret (internal_call (invest) (message USER_ID HALF_GOAL)))
-(interpret (internal_call (close_sale) (message OWNER_ID 0)))
-(interpret (internal_call (claim_refund USER_ID) (message USER_ID 0)))
-(check_req cur_state)
-(print_states cur_state)
+
+(define (exec calls msgs) (
+  begin
+  (init_state)
+  (for ([c calls] [m msgs]) (
+    interpret (internal_call (c) m)
+  ))
+  (print_states cur_state)
+  (check_req cur_state)
+))
+
+
+; Normal Trace
+
+; (define normal (exec 
+;   (list invest set_overflow_time close_sale claim_refund)
+;   (list (message USER_ID HALF_GOAL) default_message default_message (message USER_ID 0))
+; ))
+
+
+(define bug_trace1 (exec
+  (list invest set_overflow_time set_external_call_failed close_sale claim_refund)
+  (list (message USER_ID HALF_GOAL) default_message default_message default_message (message USER_ID 0))
+))
+
+; (pretty-print normal)
+(pretty-print bug_trace1)
