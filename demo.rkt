@@ -2,10 +2,7 @@
 
 (require 
     rosette/lib/destruct
-    errortrace
     racket/format
-    racket/syntax-srcloc
-    math/base
 )
 
 ; Constants
@@ -25,7 +22,7 @@
 (define GOAL 10000)
 (define ZERO 0)
 (define HALF_GOAL (/ GOAL 2))
-(define OVERFLOW_MONEY (+ GOAL 1))
+(define OVERFLOW_GOAL (+ GOAL 1))
 
 ; Utils
 (define (modify_vector vec pos mod) (
@@ -103,11 +100,16 @@
     [_ _expr]
 ))
 
+(define-symbolic expr (~> integer? boolean?))
+(define-symbolic x integer?)
+
+
 ; Conditions
 (define (only_owner state) (equal? (message-sender (get-field cur_message state)) OWNER_ID))
 (define (withdraw_req state) (equal? (get-field crowdsale_state state) SUCCESS))
 (define (claim_refund_req state) (equal? (get-field crowdsale_state state) REFUND))
-(define (invest_req state) (< (get-field raised state) GOAL))
+; (define (invest_req state) (and (< (get-field raised state) GOAL) (<= (get-field now state) CLOSE_TIME)))
+(define (invest_req state) (and (< (get-field raised state) GOAL) (<= (get-field now state) x)))
 (define (close_sale_req state) (or (> (get-field now state) CLOSE_TIME) (>= (get-field raised state) GOAL)))
 
 ; Requirements
@@ -177,7 +179,7 @@
       [external_call_failed #f]
 
       [deposits (make-vector USER_NUM 0)]
-      [accounts (vector 0 0 0 OVERFLOW_MONEY)]
+      [accounts (vector 0 0 0 OVERFLOW_GOAL)]
       [cur_message default_message]
 
       [last_refund_addr null]
@@ -199,7 +201,7 @@
     ))
 
     (define/public (sum_deposits) (
-      sum (vector->list deposits)
+      apply + (vector->list deposits)
     ))
 
     (define/public (transfer_value from to value) (
@@ -396,29 +398,48 @@
 ))
 
 
-(define (exec calls msgs) (
+(define (exec calls) (
   begin
   (init_state)
-  (for ([c calls] [m msgs]) (
-    interpret (internal_call (c) m)
+  (for ([c calls]) (
+    interpret (internal_call ((car c)) (cdr c))
   ))
-  (print_states cur_state)
+  ; (print_states cur_state)
   (check_req cur_state)
 ))
 
 
 ; Normal Trace
 
-; (define normal (exec 
-;   (list invest set_overflow_time close_sale claim_refund)
-;   (list (message USER_ID HALF_GOAL) default_message default_message (message USER_ID 0))
-; ))
+(define normal (exec 
+  (list 
+    (cons invest (message USER_ID HALF_GOAL))
+    (cons set_overflow_time default_message)
+    (cons close_sale default_message) 
+    (cons claim_refund (message USER_ID 0))
+  )
+))
 
 
 (define bug_trace1 (exec
-  (list invest set_overflow_time set_external_call_failed close_sale claim_refund)
-  (list (message USER_ID HALF_GOAL) default_message default_message default_message (message USER_ID 0))
+  (list 
+    (cons invest (message USER_ID HALF_GOAL))
+    (cons set_overflow_time default_message)
+    (cons close_sale default_message)
+    (cons claim_refund (message USER_ID 0))
+    (cons invest (message USER_ID OVERFLOW_GOAL))
+    (cons close_sale default_message)
+    (cons withdraw default_message)
+  )
 ))
 
 ; (pretty-print normal)
-(pretty-print bug_trace1)
+(define (solver) (solve
+    (begin
+      ; (assert (equal? '(#t #t #t #t) normal))
+      (assert (equal? '(#t #t #t #t) bug_trace1))
+    )
+))
+
+(solver)
+(vc)
