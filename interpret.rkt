@@ -165,7 +165,7 @@
       (add-deposit state address amount)
       (add-account state address amount)
       (set-state-last_refund_called! state (bool))
-      ; (set-state-refund_called! state (bool))
+      (set-state-refund_called! state (bool))
       (set-state-last_refund_addr! state null)
     )
   ]
