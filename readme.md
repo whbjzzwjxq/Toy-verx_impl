@@ -1,18 +1,27 @@
 # Demo for rosette
 
-Run this:
+## Run
 
 ```cmd
 racket -l errortrace -t ./main.rkt
 ```
 
+```tips
 Find program holes:
 Search `Autofix here`
+```
+
+## Directory
 
 interpret -> interpreter for the example
+
 property -> requirments for the contract
+
 state -> execution state
+
 temporal -> interpreter for temporal logic
+
+main -> main program
 
 ## Reference
 
