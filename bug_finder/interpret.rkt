@@ -2,8 +2,8 @@
 
 (require 
   rosette/lib/destruct
-  rosette/lib/synthax
   "./state.rkt"
+  "./state_modifier.rkt"
 )
 
 (provide (all-defined-out))
@@ -14,6 +14,9 @@
 (define (claim_refund_req state) (equal? (state-crowdsale_state state) REFUND))
 (define (close_sale_req state) (or (> (state-now state) CLOSE_TIME) (>= (state-raised state) GOAL)))
 (define (invest_req state) (< (state-raised state) GOAL))
+(define (fallback_sketch state address amount) (
+  pretty-print "DoNothing"
+))
 (define now 0)
 
 
@@ -100,7 +103,7 @@
             (
               begin
               (interpret (internal_call (deposit) (state-cur_message cur_state)))
-              (set-state-raised! cur_state (+ (state-raised cur_state) msg-value))
+              (add-raised cur_state msg-value)
             )
           )
       )]
@@ -152,9 +155,4 @@
       )]
 
       [_ p]
-))
-
-; Origin
-(define (fallback_sketch state address amount) (
-  pretty-print "DoNothing"
 ))
