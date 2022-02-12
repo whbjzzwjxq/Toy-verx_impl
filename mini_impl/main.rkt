@@ -24,6 +24,9 @@
 (define normal1 (exec 
   (list 
     (cons invest (message USER_ID HALF_GOAL))
+    (cons invest (message USER_ID HALF_GOAL))
+    (cons close_sale (default-message))
+    (cons withdraw (default-message))
   )
 ))
 
@@ -58,7 +61,7 @@
     (cons claim_refund (message USER_ID 0))
   )
 ))
-
+    
 ; For transfer value failed
 (define bug_trace3 (exec
   (list 
@@ -66,7 +69,6 @@
     (cons set_overflow_time (default-message))
     (cons close_sale (default-message))
     (cons set_external_call_failed (default-message))
-    (cons claim_refund (message USER_ID 0))
     (cons claim_refund (message USER_ID 0))
   )
 ))
@@ -79,11 +81,12 @@
   (begin
     (assume (>= now 0))
     (assume (<= now CLOSE_TIME))
-    (assert (equal? (get-balance normal1) HALF_GOAL))
+    (assert (equal? (vector-ref (state-accounts normal1) BENEF_ID) GOAL))
+    (assert (equal? (vector-ref (state-accounts normal2) USER_ID) ALL_VALUE))
+    (assert (equal? all-right (check-req normal1)))
     (assert (equal? all-right (check-req normal2)))
     (assert (equal? all-right (check-req bug_trace1)))
     (assert (equal? all-right (check-req bug_trace2)))
-    (assert (equal? (vector-ref (state-accounts bug_trace3) USER_ID) ALL_VALUE))
     (assert (equal? all-right (check-req bug_trace3)))
   )
 ))

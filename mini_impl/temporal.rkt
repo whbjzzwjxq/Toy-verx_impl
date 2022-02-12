@@ -28,7 +28,7 @@
       (eval-temp-expr (formula (get-last state)))
     )]
 
-    ; Not check whether given_state is non_moment
+    ; Not check whether the given state is non-moment
     [(since formula state given_state) (
       or
       (eval-temp-expr (formula state))

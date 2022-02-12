@@ -7,9 +7,9 @@
 (provide (all-defined-out))
 
 ; Constants
-(define OPEN 'OPEN)
-(define SUCCESS 'SUCCESS)
-(define REFUND 'REFUND)
+(define OPEN 0)
+(define SUCCESS 1)
+(define REFUND 2)
 
 (define OWNER_ID 0)
 (define CONTRACT_ID 1)

@@ -3,7 +3,7 @@
 ## Run
 
 ```cmd
-racket -l errortrace -t ./main.rkt
+racket -l errortrace -t ./mini_impl/main.rkt
 ```
 
 ```tips
@@ -13,15 +13,21 @@ Search `Autofix here`
 
 ## Directory
 
-interpret -> interpreter for the example
+entire_impl:
 
-property -> requirments for the contract
+  Todo
 
-state -> execution state
+mini_impl:
 
-temporal -> interpreter for temporal logic
+  interpret -> interpreter for the example
 
-main -> main program
+  property -> requirments for the contract
+
+  state -> execution state
+
+  temporal -> interpreter for temporal logic
+
+  main -> main program
 
 ## Reference
 
